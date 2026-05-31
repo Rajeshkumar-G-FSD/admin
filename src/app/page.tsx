@@ -1,65 +1,154 @@
-import Image from "next/image";
+import StatCard from "@/components/StatCard";
+import StatusBadge from "@/components/StatusBadge";
+import { ORDERS, STATS, MENU_ITEMS } from "@/data/mockData";
 
-export default function Home() {
+const s: React.CSSProperties = {
+  padding: "2rem",
+  minHeight: "100vh",
+  background: "#0f1117",
+};
+
+export default function DashboardPage() {
+  const recentOrders = ORDERS.slice(0, 5);
+  const topItems     = [...MENU_ITEMS].sort((a, b) => b.orders - a.orders).slice(0, 5);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div style={s}>
+      {/* Header */}
+      <div style={{ marginBottom: "2rem" }}>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#fff" }}>Dashboard</h1>
+        <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.4)", marginTop: "0.25rem" }}>
+          Today's overview — SRM Restaurant, Erode
+        </p>
+      </div>
+
+      {/* Stat cards */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+        gap: "1rem",
+        marginBottom: "2rem",
+      }}>
+        <StatCard icon="📋" label="Today's Orders"   value={STATS.todayOrders}            sub="↑ 12% vs yesterday"         accent="#f5c842" />
+        <StatCard icon="₹"  label="Today's Revenue"  value={`₹${STATS.todayRevenue.toLocaleString()}`} sub="Avg ₹390 / order"  accent="#34d399" />
+        <StatCard icon="⏳" label="Pending Orders"   value={STATS.pendingOrders}           sub="Needs attention"            accent="#fb923c" />
+        <StatCard icon="🍽️" label="Menu Items"       value={STATS.menuItems}               sub="2 currently unavailable"   accent="#a78bfa" />
+        <StatCard icon="⭐" label="Top Item Today"   value={STATS.topItem}                 sub="312 orders all-time"        accent="#f5c842" />
+        <StatCard icon="📊" label="Avg Order Value"  value={`₹${STATS.avgOrderValue}`}    sub="Per transaction"            accent="#60a5fa" />
+      </div>
+
+      {/* Two-column: recent orders + top items */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "1.5rem" }}>
+
+        {/* Recent orders */}
+        <div style={{
+          background: "#1a1d2e",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: 14,
+          overflow: "hidden",
+        }}>
+          <div style={{
+            padding: "1.1rem 1.5rem",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+          }}>
+            <h2 style={{ fontWeight: 700, fontSize: "0.95rem", color: "#fff" }}>Recent Orders</h2>
+            <a href="/orders" style={{ fontSize: "0.78rem", color: "#f5c842", textDecoration: "none" }}>View all →</a>
+          </div>
+
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "rgba(255,255,255,0.03)" }}>
+                {["Order ID","Customer","Items","Total","Status","Time"].map(h => (
+                  <th key={h} style={{
+                    padding: "0.65rem 1rem",
+                    textAlign: "left",
+                    fontSize: "0.72rem",
+                    fontWeight: 600,
+                    color: "rgba(255,255,255,0.35)",
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    whiteSpace: "nowrap",
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {recentOrders.map((o) => (
+                <tr key={o.id} style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                  <td style={{ padding: "0.85rem 1rem", fontSize: "0.8rem", color: "#f5c842", fontWeight: 600 }}>{o.id}</td>
+                  <td style={{ padding: "0.85rem 1rem" }}>
+                    <div style={{ fontSize: "0.85rem", color: "#fff", fontWeight: 500 }}>{o.customer}</div>
+                    <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.35)" }}>{o.type}</div>
+                  </td>
+                  <td style={{ padding: "0.85rem 1rem", fontSize: "0.8rem", color: "rgba(255,255,255,0.55)" }}>
+                    {o.items.map(it => it.name).join(", ").slice(0, 28)}{o.items.length > 1 ? "…" : ""}
+                  </td>
+                  <td style={{ padding: "0.85rem 1rem", fontSize: "0.88rem", fontWeight: 700, color: "#fff" }}>₹{o.total}</td>
+                  <td style={{ padding: "0.85rem 1rem" }}><StatusBadge status={o.status} /></td>
+                  <td style={{ padding: "0.85rem 1rem", fontSize: "0.78rem", color: "rgba(255,255,255,0.35)" }}>{o.time}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Top selling items */}
+        <div style={{
+          background: "#1a1d2e",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: 14,
+          overflow: "hidden",
+        }}>
+          <div style={{
+            padding: "1.1rem 1.5rem",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+          }}>
+            <h2 style={{ fontWeight: 700, fontSize: "0.95rem", color: "#fff" }}>Top Items</h2>
+            <a href="/menu" style={{ fontSize: "0.78rem", color: "#f5c842", textDecoration: "none" }}>Manage →</a>
+          </div>
+
+          <div style={{ padding: "0.75rem" }}>
+            {topItems.map((item, i) => (
+              <div key={item.id} style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.85rem",
+                padding: "0.7rem 0.75rem",
+                borderRadius: 10,
+                marginBottom: "0.25rem",
+                background: i === 0 ? "rgba(245,200,66,0.05)" : "transparent",
+              }}>
+                <div style={{
+                  width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+                  background: "rgba(255,255,255,0.06)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.25rem",
+                }}>
+                  {item.emoji}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#fff",
+                                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {item.name}
+                  </div>
+                  <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.35)" }}>
+                    {item.orders} orders · ₹{item.price}
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: "0.72rem", fontWeight: 700,
+                  color: i === 0 ? "#f5c842" : "rgba(255,255,255,0.25)",
+                  minWidth: 20, textAlign: "right",
+                }}>
+                  #{i + 1}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
