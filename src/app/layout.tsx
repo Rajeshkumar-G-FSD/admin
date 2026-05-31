@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+import AuthGuard from "@/components/AuthGuard";
+import SidebarWrapper from "@/components/SidebarWrapper";
+import MainWrapper from "@/components/MainWrapper";
 
 export const metadata: Metadata = {
   title: "SRM Restaurant — Admin",
@@ -11,10 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body style={{ display: "flex", minHeight: "100vh" }}>
-        <Sidebar />
-        <main style={{ flex: 1, marginLeft: "var(--sidebar-w)", overflowX: "hidden" }}>
-          {children}
-        </main>
+        <AuthGuard>
+          <SidebarWrapper />
+          <MainWrapper>{children}</MainWrapper>
+        </AuthGuard>
       </body>
     </html>
   );
